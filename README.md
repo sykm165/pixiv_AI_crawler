@@ -13,7 +13,7 @@
 ## 环境配置
 环境配置参考 [ConvNeXt](https://github.com/facebookresearch/ConvNeXt.git)
 
-需要 **pytorch==1.8 timm==0.3.2**
+需要 **pytorch==2.0+ timm==1.0.14**
 
 下载miniconda，创建新python环境并激活
 ```bash
