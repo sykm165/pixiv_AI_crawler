@@ -12,13 +12,11 @@ import time
 from collections import defaultdict, deque
 import datetime
 import numpy as np
-from timm.utils import get_state_dict
 
 from pathlib import Path
 
 import torch
 import torch.distributed as dist
-from torch._six import inf
 
 from tensorboardX import SummaryWriter
 from sklearn.metrics import confusion_matrix
@@ -470,7 +468,7 @@ def save_model(args, epoch, model, model_without_ddp, optimizer, loss_scaler, mo
         }
 
         if model_ema is not None:
-            to_save['model_ema'] = get_state_dict(model_ema)
+            to_save['model_ema'] = model_ema.module.state_dict() if hasattr(model_ema, 'module') else model_ema.state_dict()
 
         save_on_master(to_save, checkpoint_path)
     
