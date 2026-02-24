@@ -35,5 +35,5 @@ def make_label(root, save_path):
     return label_dict
 
 if __name__ == '__main__':
-    root='images_group/' #图像文件夹路径
+    root='ximg/' #图像文件夹路径
     label_dict=make_label(root, 'dataset.json')
