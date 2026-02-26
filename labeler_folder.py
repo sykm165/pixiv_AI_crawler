@@ -28,12 +28,12 @@ def make_label(root, save_path):
         imgs=os.listdir(root / cls)
         for img in imgs:
             if img[img.rfind('.')+1:].lower() in img_exts:
-                label_dict[os.path.join(cls, img)] = i
+                label_dict[os.path.join(cls, img)] = int(cls)
 
     with open(save_path, 'w', encoding='utf8') as f:
         json.dump(label_dict, f, ensure_ascii=False)
     return label_dict
 
 if __name__ == '__main__':
-    root='ximg/' #图像文件夹路径
-    label_dict=make_label(root, 'dataset.json')
+    root='./train/' #图像文件夹路径
+    label_dict=make_label(root, 'train.json')

@@ -3,4 +3,4 @@ images_85
 __pycache__/
 *.py[cod]
 output/
-ximg/
+train/

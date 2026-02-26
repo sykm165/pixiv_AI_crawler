@@ -13,6 +13,13 @@ import json
 from pathlib import Path
 import torch.utils.data as data
 
+import os
+import time           # 解决 name 'time' is not defined
+import cv2            # 解决 name 'cv2' is not defined
+import numpy as np
+from PIL import Image # 解决 name 'Image' is not defined
+import random
+
 from timm.data.constants import \
     IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD, IMAGENET_INCEPTION_MEAN, IMAGENET_INCEPTION_STD
 from timm.data import create_transform
@@ -117,9 +124,34 @@ class JsonDataset(data.Dataset):
 
     def __getitem__(self, idx):
         img_path, label = self.data_list[idx]
-        #img = Image.open(img_path).convert('RGB')
-        img = self.to_pil(cv2.imread(img_path))
+        
+        max_retries = 10
+        img = None
+        
+        for i in range(max_retries):
+            try:
+                # 增强型读取：支持中文、空格和特殊路径
+                raw_data = np.fromfile(img_path, dtype=np.uint8)
+                raw_img = cv2.imdecode(raw_data, cv2.IMREAD_COLOR)
+                
+                if raw_img is not None:
+                    # 转换为 PIL 对象以适配后续 transform
+                    img = Image.fromarray(cv2.cvtColor(raw_img, cv2.COLOR_BGR2RGB))
+                    break
+            except Exception as e:
+                # 记录读取失败，方便后期手动清理
+                print(f"[Rank0] 读取失败 (第 {i+1}/10 次): {img_path}, 错误: {e}")
+                time.sleep(0.1 * (2 ** i) if i < 5 else 1.0)
 
+        # --- 核心改进：如果不成功，随机换一张图再读一次 ---
+        if img is None:
+            print(f"!!! 警告：尝试 10 次仍失败。正在随机替换图片读取: {img_path}")
+            # 在整个数据集里随机挑一个新索引
+            new_idx = random.randint(0, len(self.data_list) - 1)
+            # 递归调用自己，直到读到一张好图为止
+            return self.__getitem__(new_idx)
+
+        # 正常执行数据增强
         if self.transform is not None:
             img = self.transform(img)
 

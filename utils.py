@@ -498,7 +498,8 @@ def auto_load_model(args, model, model_without_ddp, optimizer, loss_scaler, mode
             checkpoint = torch.hub.load_state_dict_from_url(
                 args.resume, map_location='cpu', check_hash=True)
         else:
-            checkpoint = torch.load(args.resume, map_location='cpu')
+            # 添加 weights_only=False 允许加载包含 numpy 等自定义数据的权重文件
+            checkpoint = torch.load(args.resume, map_location='cpu', weights_only=False)
         model_without_ddp.load_state_dict(checkpoint['model'])
         print("Resume checkpoint %s" % args.resume)
         if 'optimizer' in checkpoint and 'epoch' in checkpoint:
